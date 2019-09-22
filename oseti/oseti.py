@@ -60,16 +60,34 @@ class Analyzer(object):
             return (0, 0)
         return (sum(polarities), len(polarities))
 
-    def analyze(self, text):
-        """Calculate sentiment polarity scores per sentence
+    def analyze(self, text, raw_score=False, target='sent'):
+        """Calculate sentiment polarity scores per sentence or overall document
         Arg:
             text (str)
         Return:
-            scores (list) : scores per sentence
+            scores
         """
         text = neologdn.normalize(text)
-        scores = []
-        for sentence in self._split_per_sentence(text):
-            score = self._calc_sentiment_polarity(sentence)
-            scores.append(score)
-        return scores
+        if target == 'sent':
+            scores = []
+            for sentence in self._split_per_sentence(text):
+                score = self._calc_sentiment_polarity(sentence)
+                if raw_score:
+                    scores.append(score)
+                else:
+                    scores.append(score[0] / score[1] if score[1] != 0 else 0.0)
+            return scores
+        elif target == 'doc':
+            scores = 0
+            counts = 0
+            for sentence in self._split_per_sentence(text):
+                score = self._calc_sentiment_polarity(sentence)
+                scores += score[0]
+                counts += score[1]
+            if raw_score:
+                ret = (scores, counts)
+            else:
+                ret = scores / counts if counts != 0 else 0.0
+            return ret
+        else:
+            raise ValueError('`target` is allowed only \'sent\' or \'doc\'.')
