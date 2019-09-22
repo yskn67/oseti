@@ -57,8 +57,8 @@ class Analyzer(object):
                 lemmas.append(lemma)
             node = node.next
         if not polarities:
-            return 0
-        return sum(polarities) / len(polarities)
+            return (0, 0)
+        return (sum(polarities), len(polarities))
 
     def analyze(self, text):
         """Calculate sentiment polarity scores per sentence
